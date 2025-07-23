@@ -1,0 +1,23 @@
+#!/bin/bash
+# echo "Running flake8..."
+# flake8 tests app
+# if [ 0 -ne 0 ]; then
+#     echo "flake8 failed. Commit aborted."
+#     exit 1
+# fi
+
+# echo "Running mypy..."
+# mypy tests app
+# if [ 0 -ne 0 ]; then
+#     echo "mypy failed. Commit aborted."
+#     exit 1
+# fi
+
+echo "Running pytest..."
+pytest tests
+if [ 0 -ne 0 ]; then
+    echo "pytest failed. Commit aborted."
+    exit 1
+fi
+
+echo "All checks passed. Proceeding with commit."

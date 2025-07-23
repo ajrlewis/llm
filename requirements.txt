@@ -1,0 +1,4 @@
+loguru
+openai
+pytest
+python-dotenv
