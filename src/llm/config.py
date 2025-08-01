@@ -1,9 +1,31 @@
-import os
-from dotenv import load_dotenv
+from typing import Optional
 
-load_dotenv()
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
-LLM_PROVIDER = os.getenv("LLM_PROVIDER")
-LLM_API_KEY = os.getenv("LLM_API_KEY")
-LLM_MODEL = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
-LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
+
+class Settings(BaseSettings):
+    LLM_PROVIDER: Optional[str] = Field(default=None, description="LLM provider name")
+    LLM_API_KEY: str = Field(..., description="API key for the LLM")
+    LLM_MODEL: str = Field(default="gpt-3.5-turbo", description="Model name")
+    LLM_BASE_URL: str = Field(
+        default="https://api.openai.com/v1", description="Base URL for the LLM API"
+    )
+    LLM_SYSTEM_PROMPT: str = Field(
+        default="You are a helpful AI assistant", description="Default system prompt"
+    )
+    LLM_MAX_TOKENS: int = Field(
+        default=4096, description="Maximum number of tokens for generation"
+    )
+    LLM_TEMPERATURE: float = Field(default=0.2, description="Sampling temperature")
+    LLM_FREQUENCY_PENALTY: float = Field(default=0.0, description="Frequency penalty")
+    LLM_PRESENCE_PENALTY: float = Field(default=0.0, description="Presence penalty")
+
+    LOGURU_LEVEL: str = Field(default="INFO", description="Logging level")
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+
+settings = Settings()

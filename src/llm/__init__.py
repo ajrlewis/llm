@@ -1,3 +1,3 @@
-from .client import ChatClient, AsyncChatClient
+from .llm import LLM, AsyncLLM
 
-__all__ = ["ChatClient", "AsyncChatClient"]
+__all__ = ["LLM", "AsyncLLM"]

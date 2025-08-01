@@ -1,4 +1,6 @@
 loguru
-openai
 pytest
-python-dotenv
+pydantic
+pydantic-settings
+langchain-openai
+langchain-google-genai

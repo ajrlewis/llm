@@ -1,15 +1,16 @@
 import asyncio
 import sys
 
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from loguru import logger
 
-from llm import AsyncChatClient, ChatClient
+from llm import LLM, AsyncLLM
 
 
 def main(prompt: str):
-    client = ChatClient()
-    response = client.create_chat_completion(prompt)
-
+    logger.info(f"{prompt = }")
+    llm = LLM()
+    response = llm.invoke([HumanMessage(content=prompt)])
     if "error" in response:
         logger.error(response["error"])
         return
@@ -19,8 +20,9 @@ def main(prompt: str):
 
 
 async def async_main(prompt: str):
-    client = AsyncChatClient()
-    response = await client.create_chat_completion(prompt)
+    logger.info(f"{prompt = }")
+    llm = AsyncLLM()
+    response = await llm.ainvoke([HumanMessage(content=prompt)])
 
     if "error" in response:
         logger.error(response["error"])
@@ -28,12 +30,6 @@ async def async_main(prompt: str):
 
     logger.info(response["message"]["content"])
     logger.info(response["token_usage"])
-
-
-async def async_main_stream(prompt: str):
-    client = AsyncChatClient()
-    async for chunk in client.stream_chat([{"role": "user", "content": prompt}]):
-        logger.info(chunk, end="", flush=True)
 
 
 if __name__ == "__main__":
