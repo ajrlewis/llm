@@ -6,20 +6,20 @@ from typing import Optional, AsyncGenerator
 from openai import OpenAI, AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
-from .config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_BASE_URL
+from .config import LLM_API_KEY, LLM_MODEL, LLM_BASE_URL
 
 
 class ChatClient:
     def __init__(
         self,
-        api_key: str = OPENAI_API_KEY,
-        model: str = OPENAI_MODEL,
-        base_url: str = OPENAI_BASE_URL,
+        api_key: str = LLM_API_KEY,
+        model: str = LLM_MODEL,
+        base_url: str = LLM_BASE_URL,
         system_prompt: str = "You are a helpful AI assistant",
     ):
         if not api_key:
-            logger.error("OPENAI_API_KEY environment variable is not set")
-            raise ValueError("OPENAI_API_KEY environment variable is not set")
+            logger.error("LLM_API_KEY environment variable is not set")
+            raise ValueError("LLM_API_KEY environment variable is not set")
 
         self.model = model
         self.system_prompt = system_prompt
@@ -31,39 +31,35 @@ class ChatClient:
         self.presence_penalty = 0
 
     def create_chat_completion(
-        self,
-        user_message: str,
-        context: Optional[list[ChatCompletionMessageParam]] = None,
+        self, messages: list[ChatCompletionMessageParam]
     ) -> dict:
-        context = context or []
-
-        has_system = any(msg.get("role") == "system" for msg in context)
+        has_system = any(msg.get("role") == "system" for msg in messages)
         if not has_system:
-            context.insert(0, {"role": "system", "content": self.system_prompt})
-
-        context.append({"role": "user", "content": user_message})
+            messages.insert(0, {"role": "system", "content": self.system_prompt})
 
         try:
             response = self._client.chat.completions.create(
                 model=self.model,
-                messages=context,
+                messages=messages,
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
                 frequency_penalty=self.frequency_penalty,
                 presence_penalty=self.presence_penalty,
             )
 
+            logger.debug(f"{response = }")
             choice = response.choices[0].message.content.strip()
             usage = response.usage
 
             return {
                 "message": {"role": "assistant", "content": choice},
                 "token_usage": {
-                    "tokens_input": usage.prompt_tokens,
-                    "tokens_output": usage.completion_tokens,
-                    "tokens_total": usage.total_tokens,
+                    "prompt_tokens": usage.prompt_tokens,
+                    "completion_tokens": usage.completion_tokens,
+                    "total_tokens": usage.total_tokens,
                 },
             }
+
         except Exception as e:
             logger.exception("Chat completion failed")
             return {"error": str(e)}
@@ -72,14 +68,14 @@ class ChatClient:
 class AsyncChatClient:
     def __init__(
         self,
-        api_key: str = OPENAI_API_KEY,
-        model: str = OPENAI_MODEL,
-        base_url: str = OPENAI_BASE_URL,
+        api_key: str = LLM_API_KEY,
+        model: str = LLM_MODEL,
+        base_url: str = LLM_BASE_URL,
         system_prompt: str = "You are a helpful AI assistant",
     ):
         if not api_key:
-            logger.error("OPENAI_API_KEY environment variable is not set")
-            raise ValueError("OPENAI_API_KEY environment variable is not set")
+            logger.error("LLM_API_KEY environment variable is not set")
+            raise ValueError("LLM_API_KEY environment variable is not set")
 
         self.model = model
         self.system_prompt = system_prompt
@@ -119,9 +115,9 @@ class AsyncChatClient:
             return {
                 "message": {"role": "assistant", "content": content},
                 "token_usage": {
-                    "tokens_input": usage.prompt_tokens,
-                    "tokens_output": usage.completion_tokens,
-                    "tokens_total": usage.total_tokens,
+                    "prompt_tokens": usage.prompt_tokens,
+                    "completion_tokens": usage.completion_tokens,
+                    "total_tokens": usage.total_tokens,
                 },
             }
         except Exception as e:
